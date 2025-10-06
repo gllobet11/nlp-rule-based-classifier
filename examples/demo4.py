@@ -1,7 +1,16 @@
+# --- Bootstrap de paths para ejecutar ejemplos desde /examples ---
+import os, sys
+ROOT = os.path.dirname(os.path.dirname(__file__))   # carpeta raíz del repo
+SRC  = os.path.join(ROOT, "src")                    # src/nlrules
+
+# Añadir raíz (para importar base.py) y src (para importar nlrules/*)
+sys.path.insert(0, SRC)
+sys.path.insert(0, ROOT)
+
 from datetime import datetime
 from base import Email
-from impl.parsing import NLConfigParserImpl
-from impl.deserializer import ClassifierDeserializerImpl
+from nlrules.parsing import NLConfigParserImpl
+from nlrules.deserializer import ClassifierDeserializerImpl
 
 def run():
     nl = """

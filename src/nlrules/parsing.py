@@ -1,7 +1,7 @@
 
 import re
 from base import NaturalLanguageConfigParser
-from impl.utils import norm, get_logger
+from .utils import norm, get_logger
 
 # Acepta comillas rectas, tipográficas y simples
 _QUOTE = r"['\"“”]"

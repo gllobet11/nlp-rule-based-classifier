@@ -3,7 +3,7 @@ import os
 import time
 import requests
 from base import Classifier, Email
-from impl.utils import norm, get_logger
+from .utils import norm, get_logger
 
 log = get_logger(__name__)
 

@@ -1,7 +1,6 @@
 
 from base import Classifier
-from impl.classifiers import ConditionClassifier, APIClassifier, SequentialClassifier
-
+from .classifiers import ConditionClassifier, APIClassifier, SequentialClassifier
 class ClassifierDeserializerImpl:
     def deserialize(self, config: dict) -> Classifier:
         rules = config.get("rules", [])
