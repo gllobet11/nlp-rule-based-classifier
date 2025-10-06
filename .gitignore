@@ -1,0 +1,40 @@
+# 🐍 Entorno virtual
+.venv/
+venv/
+
+# 🧠 Archivos compilados / caché de Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# 🧪 Archivos temporales o de pruebas
+*.log
+*.tmp
+*.bak
+*.old
+.cache/
+pytest_cache/
+
+# 🧰 Archivos de IDEs y editores
+.vscode/
+.idea/
+*.swp
+
+# 📦 Distribuciones o builds
+dist/
+build/
+*.egg-info/
+
+# 📄 Documentos y enunciados locales (no relevantes para código)
+enunciado.docx
+enunciado.odt
+~$enunciado.docx*
+*.Zone.Identifier
+
+# ⚙️ Archivos de entorno y configuración privada
+.env
+.env.local
+
+# 📋 Archivos de Office bloqueados o temporales
+~$*
