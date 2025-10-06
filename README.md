@@ -1,40 +1,49 @@
+
 # 🧠 Parte 4 — Sistema de Clasificación Flexible
 
 ## 🎯 Objetivo
+
 Implementar un sistema capaz de **convertir descripciones en lenguaje natural** (en español o inglés) en un **clasificador funcional** que evalúe correos electrónicos según criterios configurables.
 
 El sistema permite:
-- Reglas condicionales `contains` / `equals` sobre `asunto`, `cuerpo` o `remitente`.
-- Reglas escritas en lenguaje natural, por ejemplo:  
-  > “Si el asunto contiene la palabra *urgente*, clasificarlo como *urgente*.  
-  > Si no, usar el clasificador por defecto.”
 
-- Un **clasificador por defecto** que llama a la API implementada en la Parte 1.
+* Reglas condicionales `contains` / `equals` sobre `asunto`, `cuerpo` o `remitente`.
+
+* Reglas escritas en lenguaje natural, por ejemplo:
+
+  > “Si el asunto contiene la palabra *urgente*, clasificarlo como *urgente*.”
+  > “Si no, usar el clasificador por defecto.”
+
+* Un **clasificador por defecto** que llama a la API implementada en la Parte 1.
 
 ---
 
 ## ⚙️ Estructura del proyecto
 
 ```
-
 parte4/
 │
-├── base.py                  # Interfaces base proporcionadas
-├── dependencies.py          # Carga dinámica de implementaciones
-├── test.py                  # Tests oficiales (unittest)
+├── src/
+│   └── nlrules/
+│       ├── __init__.py
+│       ├── parsing.py           # Traduce lenguaje natural → JSON de reglas
+│       ├── deserializer.py      # Crea clasificadores a partir del JSON config
+│       └── classifiers.py       # APIClassifier, ConditionClassifier, SequentialClassifier
 │
-├── impl/
-│   ├── classifiers.py       # APIClassifier, ConditionClassifier, SequentialClassifier
-│   ├── deserializer.py      # Crea clasificadores a partir del JSON config
-│   ├── parsing.py           # Traduce lenguaje natural → JSON de reglas
-│   ├── utils.py             # Normalización y logging
+├── examples/
+│   ├── demo.py                  # Ejemplo simple de uso
+│   ├── demo2.py                 # Ejemplo con varios criterios
+│   ├── demo3.py                 # Ejemplo con condiciones mixtas
+│   └── demo_profesional_1.py    # Ejemplo extendido de negocio real
 │
-├── demo.py                  # Ejemplo simple de uso
-├── demo2.py                 # Ejemplo intermedio con varios criterios
-├── demo3.py                 # Ejemplo de múltiples condiciones mixtas
-└── demo4.py                 # Ejemplo extendido para pruebas profesionales
-
-````
+├── tests/
+│   └── test.py                  # Tests oficiales (unittest)
+│
+├── base.py                      # Interfaces base proporcionadas
+├── dependencies.py              # Carga dinámica de implementaciones
+├── requirements.txt             # Dependencias mínimas
+└── README.md
+```
 
 ---
 
@@ -46,7 +55,7 @@ Se recomienda usar un entorno virtual:
 python -m venv .venv
 source .venv/bin/activate  # En Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-````
+```
 
 **`requirements.txt`:**
 
@@ -61,7 +70,7 @@ requests>=2.31.0
 ### 1️⃣ Ejecutar los tests oficiales
 
 ```bash
-python -m unittest test.py
+python -m unittest tests/test.py
 ```
 
 Salida esperada:
@@ -71,10 +80,12 @@ Ran 7 tests in X.XXXs
 OK
 ```
 
+---
+
 ### 2️⃣ Probar un ejemplo con reglas personalizadas
 
 ```bash
-python demo.py
+python examples/demo.py
 ```
 
 Salida esperada:
@@ -124,7 +135,7 @@ Resultado JSON:
 }
 ```
 
-Ejemplo de salida:
+Salida esperada:
 
 ```
 Email 1 -> regulatorio
@@ -141,18 +152,19 @@ Email 3 -> incidencia
 * **Logs de depuración activables** vía `DEBUG_PART4=1`.
 * **Reintentos y backoff exponencial** en el clasificador por API.
 * **Extensible:** añadir nuevas expresiones o idiomas solo requiere modificar `parsing.py`.
+* **Diseño modular:** separación clara entre parsing, deserialización y clasificación.
 
 ---
 
 ## 🧾 Autoría
 
-**Desarrollado por:** *Gerard* — Data Scientist 
+**Desarrollado por:** *Gerard* — Data Scientist en formación
 **Enfoque:** Código modular, legible y extensible.
 Cumple todos los requisitos del enunciado de la Parte 4.
 
 ---
 
-> 💡 Consejo: para probar nuevas reglas, edita el texto en `demo3.py` y observa cómo el sistema genera automáticamente las configuraciones y clasifica los correos.
+> 💡 Consejo: para probar nuevas reglas, edita el texto en `examples/demo3.py` y observa cómo el sistema genera automáticamente las configuraciones y clasifica los correos.
 
 ---
 
