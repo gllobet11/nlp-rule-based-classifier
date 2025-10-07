@@ -1,4 +1,4 @@
-# Part 4 — Flexible Email Classification System
+# Flexible Email Classification System
 
 ## Objective
 
