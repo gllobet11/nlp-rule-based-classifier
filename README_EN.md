@@ -1,62 +1,54 @@
-# 🧠 Part 4 — Flexible Email Classification System
+# Part 4 — Flexible Email Classification System
 
-## 🎯 Objective
+## Objective
 
-Implement a system capable of **translating natural language descriptions** (in Spanish or English) into a **functional email classifier** that evaluates incoming messages based on configurable criteria.
+Develop a system capable of translating **natural language descriptions** (in Spanish or English) into a **functional classifier** that evaluates emails according to configurable business rules.
 
 The system supports:
 
-* Conditional rules using `contains` / `equals` over `subject`, `body`, or `sender`.
-
-* Rules written in natural language, for example:
-
-  > “If the subject contains the word *urgent*, classify it as *urgent*.”
-  > “Otherwise, use the default classifier.”
-
-* A **default classifier** that connects to the API implemented in **Part 1**.
+* Conditional rules (`contains` / `equals`) on `subject`, `body`, or `sender`
+* Natural language definitions such as:
+  “If the subject contains the word *urgent*, classify it as *urgent*.”
+* A **default classifier** that delegates to the API implemented in Part 1.
 
 ---
 
-## ⚙️ Project Structure
+## Project Structure
 
 ```
-parte4/
-│
+part4/
 ├── src/
 │   └── nlrules/
 │       ├── __init__.py
-│       ├── parsing.py           # Translates natural language → JSON rule config
-│       ├── deserializer.py      # Builds classifiers from the JSON config
-│       └── classifiers.py       # APIClassifier, ConditionClassifier, SequentialClassifier
-│
+│       ├── parsing.py           # Natural Language → JSON rules
+│       ├── deserializer.py      # JSON → Classifier objects
+│       └── classifiers.py       # ConditionClassifier, APIClassifier, SequentialClassifier
 ├── examples/
-│   ├── demo.py                  # Simple usage example
-│   ├── demo2.py                 # Intermediate example with multiple criteria
-│   ├── demo3.py                 # Mixed conditional rules
-│   └── demo_profesional_1.py    # Business-oriented example
-│
+│   ├── demo.py
+│   ├── demo2.py
+│   ├── demo3.py
+│   └── demo_professional_1.py
 ├── tests/
-│   └── test.py                  # Official unit tests
-│
-├── base.py                      # Provided abstract base classes
-├── dependencies.py              # Dynamic dependency loading
-├── requirements.txt             # Minimal dependencies
+│   └── test.py                  # Official tests (unittest)
+├── base.py                      # Provided base interfaces
+├── dependencies.py              # Factory for parser/deserializer
+├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## 🧩 Installation
+## Installation
 
-It is recommended to use a virtual environment:
+It is recommended to work within a virtual environment:
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+source .venv/bin/activate        # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-**`requirements.txt`:**
+**requirements.txt**
 
 ```
 requests>=2.31.0
@@ -64,12 +56,14 @@ requests>=2.31.0
 
 ---
 
-## 🚀 Usage
+## Usage
 
-### 1️⃣ Run the official unit tests
+### Run the official tests
 
 ```bash
-python -m unittest tests/test.py
+python -m unittest tests/test.py -v
+# or
+python -m unittest discover -s tests -p "test*.py" -v
 ```
 
 Expected output:
@@ -79,15 +73,13 @@ Ran 7 tests in X.XXXs
 OK
 ```
 
----
-
-### 2️⃣ Try a custom rule set
+### Run an example
 
 ```bash
 python examples/demo.py
 ```
 
-Expected output:
+Example output:
 
 ```
 CONFIG: {'rules': [...]}
@@ -96,74 +88,92 @@ RESULT: urgent
 
 ---
 
-## ⚙️ API Configuration (optional)
+## Default API Classifier Configuration
 
-The default classifier (`APIClassifier`) can be parameterized via environment variables:
+The `APIClassifier` can be configured through environment variables:
+
+| Variable              | Type  | Default Value                          | Description                               |
+| --------------------- | ----- | -------------------------------------- | ----------------------------------------- |
+| `DEFAULT_API_URL`     | str   | `http://localhost:8000/classify-email` | Endpoint from Part 1                      |
+| `DEFAULT_API_TIMEOUT` | float | `6.0`                                  | Request timeout (seconds)                 |
+| `DEFAULT_API_RETRIES` | int   | `2`                                    | Retry attempts on failure                 |
+| `DEFAULT_API_BACKOFF` | float | `0.4`                                  | Exponential backoff base (seconds)        |
+| `DEBUG_PART4`         | {0,1} | `0`                                    | Enables debug-level logging if set to `1` |
+
+Example:
 
 ```bash
 export DEFAULT_API_URL="http://localhost:8000/classify-email"
 export DEFAULT_API_TIMEOUT=6
 export DEFAULT_API_RETRIES=2
 export DEFAULT_API_BACKOFF=0.4
+export DEBUG_PART4=1
 ```
-
-> 🔸 If **no environment variables** are defined, defaults will be used:
-> `URL=http://localhost:8000/classify-email`, `timeout=5s`, `retries=1`, `backoff=0.3s`.
 
 ---
 
-## 🧠 Realistic Example
+## Natural Language Input → JSON Configuration
 
-Natural language input:
+Input:
 
 ```
 Assign the category "regulatory" if the sender is "inspecciones@cnmc.es".
-If the subject contains the word "reclamation", classify it as "reclamacion".
-If the body contains the word "outage", classify it as "incident".
+If the subject contains the word "complaint", classify it as "reclamation".
+If the body contains the word "failure", classify it as "incident".
 ```
 
-Resulting JSON:
+Output (JSON):
 
 ```json
 {
   "rules": [
     {"type": "condition", "field": "sender", "operator": "equals", "value": "inspecciones@cnmc.es", "category": "regulatory"},
-    {"type": "condition", "field": "subject", "operator": "contains", "value": "reclamacion", "category": "reclamacion"},
-    {"type": "condition", "field": "body", "operator": "contains", "value": "avería", "category": "incident"}
+    {"type": "condition", "field": "subject", "operator": "contains", "value": "complaint", "category": "reclamation"},
+    {"type": "condition", "field": "body", "operator": "contains", "value": "failure", "category": "incident"}
   ]
 }
 ```
 
-Expected classification output:
+---
 
+## High-Level Flow Diagram
+
+```mermaid
+flowchart TD
+    classDef process fill:#e8eef7,stroke:#8aa2c8,color:#1b2a41
+    classDef decision fill:#fde9d9,stroke:#e3a16f,color:#3a2e1f,font-weight:bold
+    classDef output fill:#ece2f6,stroke:#b39ddb,color:#2c1e3f
+
+    A["Natural Language Input"]:::process --> B["Parser: NL → JSON Rules"]:::process
+    B --> C["Deserializer: JSON → Classifiers"]:::process
+    C --> D{"Sequential Rule Evaluation"}:::decision
+
+    D -- "Condition matched" --> E["Return rule category"]:::output
+    D -- "No match" --> F["APIClassifier (Part 1)"]:::process
+    F --> G["Default classifier API response"]:::output
 ```
-Email 1 -> regulatory
-Email 2 -> reclamacion
-Email 3 -> incident
-```
 
 ---
 
-## 🧰 Technical Highlights
+## Design and Key Features
 
-* **Multilingual parser (ES/EN)** with support for typographic quotes and accented characters.
-* **Robust normalization** (`áéíóú` → `aeiou`).
-* **Debug logs** enabled via `DEBUG_PART4=1`.
-* **Retry & exponential backoff** in the API classifier.
-* **Modular design** — clear separation between parsing, deserialization, and classification logic.
-* **Easily extensible:** adding new rule expressions or languages only requires editing `parsing.py`.
-
----
-
-## 🧾 Author
-
-**Developed by:** *Gerard* — Data Scientist in training
-**Focus:** Clean, modular, and extensible code.
-Fully compliant with all requirements defined for Part 4.
+* **Multilingual parsing (ES/EN)** supporting both straight and typographic quotes.
+* **Robust text normalization**: removes accents and enforces lowercase consistency.
+* **Supported operators**: `equals` and `contains` for `subject`, `body`, and `sender`.
+* **Sequential logic**: the first matching rule determines the result; otherwise, the default classifier is invoked.
+* **Debug logging** enabled via `DEBUG_PART4=1`.
+* **Resilient API calls** with retry and exponential backoff strategies.
 
 ---
 
-> 💡 Tip: to test new rules, edit the text in `examples/demo3.py` and observe how the system dynamically generates classification configurations.
+## Extensibility
+
+* New operators (e.g. `startswith`, `regex`) can be added by extending `parsing.py` and `classifiers.py`.
+* Additional features (e.g. time-based rules) can be integrated by modifying the `Email` dataclass and the rule engine.
+* The HTTP API call can be replaced by a gRPC client if required for performance or scalability.
 
 ---
 
+## Author
+
+**Gerard** — Data Scientist.
